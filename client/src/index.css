@@ -1,0 +1,28 @@
+@import url("https://fonts.googleapis.com/css2?family=Antonio:wght@100..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Mozilla+Headline:wght@200..700&family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+
+@import "tailwindcss";
+
+* {
+  font-family: Outfit;
+}
+
+.slider {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 100%;
+  background: transparent;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 30px;
+  min-height: 30px;
+  background-image: url(/slide_icon.svg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.bg-layer {
+  background-image: url(/bg_layer.png);
+}
