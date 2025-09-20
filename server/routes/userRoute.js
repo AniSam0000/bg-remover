@@ -5,6 +5,10 @@ import { clerkWebhooks } from "../controller/usercontroller.js";
 
 const userRouter = express.Router();
 
-userRouter.post("/webhooks", clerkWebhooks);
+userRouter.post(
+  "/webhooks",
+  express.raw({ type: "application/json" }),
+  clerkWebhooks
+);
 
 export default userRouter;

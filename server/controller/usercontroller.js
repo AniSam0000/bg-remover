@@ -17,6 +17,8 @@ const clerkWebhooks = async (req, res) => {
 
     const { data, type } = req.body;
 
+    console.log(data);
+
     switch (type) {
       case "user.created": {
         const userdata = {
@@ -42,7 +44,7 @@ const clerkWebhooks = async (req, res) => {
           photo: data.image_url,
         };
 
-        await userModel.findOneAndUpdate({ clerkid: data.id, userdata });
+        await userModel.findOneAndUpdate({ clerkid: data.id }, userdata);
         res.json({});
         break;
       }

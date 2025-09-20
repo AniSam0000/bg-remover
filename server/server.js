@@ -11,7 +11,7 @@ const app = express();
 await connectDB();
 
 // Initialize Middleware
-app.use(express.json());
+// app.use(express.json());
 app.use(cors()); // Use to connect client running on another server
 
 // API routes
