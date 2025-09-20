@@ -6,16 +6,18 @@ import userModel from "../models/userModel.js";
 
 const clerkWebhooks = async (req, res) => {
   try {
+    const payload = req.body; // This is now the raw buffer
+    const headers = req.headers;
     //Create a svix instance with clerk webhook secret
     const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
-    await whook.verify(JSON.stringify(req.body), {
+    const evt = await whook.verify(payload, {
       "svix-id": req.headers["svix-id"],
       "svix-timestamp": req.headers["svix-timestamp"],
       "svix-signature": req.headers["svix-signature"],
     });
 
-    const { data, type } = req.body;
+    const { data, type } = evt;
 
     console.log(data);
 
@@ -54,10 +56,9 @@ const clerkWebhooks = async (req, res) => {
         res.json({});
         break;
       }
-
-      default:
-        break;
     }
+
+    res.status(200).json({ success: true });
   } catch (error) {
     console.log(" Error in usercontroller.js and in clerkwebhooks function");
 
