@@ -6,20 +6,13 @@ import userModel from "../models/userModel.js";
 
 const clerkWebhooks = async (req, res) => {
   try {
-    const payload = req.body; // This is now the raw buffer
+    const payload = req.body;
     const headers = req.headers;
-    //Create a svix instance with clerk webhook secret
-    const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
-    const evt = await whook.verify(payload, {
-      "svix-id": req.headers["svix-id"],
-      "svix-timestamp": req.headers["svix-timestamp"],
-      "svix-signature": req.headers["svix-signature"],
-    });
+    const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
+    const evt = whook.verify(payload, headers);
 
     const { data, type } = evt;
-
-    console.log(data);
 
     switch (type) {
       case "user.created": {
@@ -32,10 +25,8 @@ const clerkWebhooks = async (req, res) => {
         };
 
         await userModel.create(userdata);
-
-        res.json({});
-
-        break;
+        // FIX: Use 'return' to send response and exit the function
+        return res.status(201).json({ success: true, message: "User created" });
       }
 
       case "user.updated": {
@@ -47,23 +38,27 @@ const clerkWebhooks = async (req, res) => {
         };
 
         await userModel.findOneAndUpdate({ clerkId: data.id }, userdata);
-        res.json({});
-        break;
+        // FIX: Use 'return' here too
+        return res.status(200).json({ success: true, message: "User updated" });
       }
 
       case "user.deleted": {
         await userModel.findOneAndDelete({ clerkId: data.id });
-        res.json({});
-        break;
+        //FIX: And here
+        return res.status(200).json({ success: true, message: "User deleted" });
       }
+
+      // BEST PRACTICE: Add a default case for unhandled events
+      default:
+        console.log(`Received unhandled event type: ${type}`);
+        return res
+          .status(200)
+          .json({ success: true, message: "Webhook received" });
     }
-
-    res.status(200).json({ success: true });
   } catch (error) {
-    console.log(" Error in usercontroller.js and in clerkwebhooks function");
-
-    console.log(error.message);
-    res.json({ success: false, message: error.message });
+    console.error("Error processing webhook:", error);
+    //FIX: Return from the catch block as well
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
 
