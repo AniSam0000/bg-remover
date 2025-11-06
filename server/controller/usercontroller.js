@@ -131,6 +131,7 @@ const paymentRazorpay = async (req, res) => {
   try {
     const { clerkId } = req.user;
     const { planId } = req.body;
+    console.log(planId);
 
     const userData = await userModel.findOne({ clerkId });
 

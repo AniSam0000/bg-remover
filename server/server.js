@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 4000;
 
 const app = express();
 await connectDB();
+app.use(express.json());
 
 // Initialize Middleware
 //app.use(express.json());
@@ -22,7 +23,6 @@ app.get("/", (req, res) => {
 //For user router
 app.use("/api/user", userRouter);
 
-app.use(express.json());
 //For Image Router
 app.use("/api/image", imageRouter);
 
