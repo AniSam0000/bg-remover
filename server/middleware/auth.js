@@ -26,11 +26,9 @@ const authUser = async (req, res, next) => {
       clerkId: token_decode.clerkId,
     };
 
-    // console.log(req.body.clerkId);
-
     next();
   } catch (error) {
-    console.log("Error in Auth function      ", error.message);
+    // console.log("Error in Auth function      ", error.message);
     return res.status(400).json({ success: false, message: error.message });
   }
 };

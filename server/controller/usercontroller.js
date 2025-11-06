@@ -8,32 +8,57 @@ import transactionModel from "../models/transactionModel.js";
 
 const clerkWebhooks = async (req, res) => {
   try {
+    if (!req.body || !req.headers) {
+      return res.status(400).send("Missing body or headers");
+    }
     const payload = req.body;
     const headers = req.headers;
 
     const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
-    const evt = whook.verify(payload, headers);
+    let evt;
+    try {
+      evt = whook.verify(req.body, req.headers);
+    } catch (verifyErr) {
+      return res.status(400).json({ error: "Invalid signature" });
+    }
 
     const { data, type } = evt;
 
     switch (type) {
       case "user.created": {
+        const primaryEmail =
+          data.email_addresses?.[0]?.email_address || "no-email@clerk.dev";
+
+        const existingUser = await userModel.findOne({ clerkId: data.id });
+
+        //If the Clerk Id exsists before
+        if (existingUser) {
+          console.log(`⚠️ User with clerkId ${data.id} already exists`);
+          return res
+            .status(200)
+            .json({ success: false, message: "User already exists" });
+        }
+
         const userdata = {
           clerkId: data.id,
-          email: data.email_addresses[0].email_address,
+          email: primaryEmail,
           firstName: data.first_name,
           lastName: data.last_name,
           photo: data.image_url,
         };
 
-        await userModel.create(userdata);
-        // FIX: Use 'return' to send response and exit the function
+        const userData = await userModel(userdata);
+        userData.save();
+
         return res.status(201).json({ success: true, message: "User created" });
       }
 
       case "user.updated": {
+        const primaryEmail =
+          data.email_addresses?.[0]?.email_address || "no-email@clerk.dev";
+
         const userdata = {
-          email: data.email_addresses[0].email_address,
+          email: primaryEmail,
           firstName: data.first_name,
           lastName: data.last_name,
           photo: data.image_url,
@@ -52,13 +77,12 @@ const clerkWebhooks = async (req, res) => {
 
       // BEST PRACTICE: Add a default case for unhandled events
       default:
-        console.log(`Received unhandled event type: ${type}`);
         return res
           .status(200)
           .json({ success: true, message: "Webhook received" });
     }
   } catch (error) {
-    console.error("Error processing webhook:", error);
+    // console.error("Error processing webhook:", error);
     //FIX: Return from the catch block as well
     return res.status(400).json({ success: false, message: error.message });
   }
@@ -70,12 +94,13 @@ const clerkWebhooks = async (req, res) => {
 const userCredits = async (req, res) => {
   try {
     const { clerkId } = req.user;
+    // console.log(clerkId);
 
-    // if (!clerkId) {
-    //   return res
-    //     .status(401)
-    //     .json({ success: false, message: "User not authenticated" });
-    // }
+    if (!clerkId) {
+      return res
+        .status(401)
+        .json({ success: false, message: "User not authenticated" });
+    }
 
     const userData = await userModel.findOne({ clerkId });
     // console.log(userData);
