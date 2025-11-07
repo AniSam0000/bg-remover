@@ -4,12 +4,20 @@ import cors from "cors";
 import connectDB from "./config/mongodb.js";
 import userRouter from "./routes/userRoute.js";
 import imageRouter from "./routes/imageRoute.js";
+import { clerkWebhooks } from "./controller/usercontroller.js";
 
 // APP CONFIG
 const PORT = process.env.PORT || 4000;
 
 const app = express();
 await connectDB();
+
+// 👇 Mount Clerk webhook route BEFORE express.json()
+app.post(
+  "/api/user/webhooks",
+  express.raw({ type: "application/json" }),
+  clerkWebhooks
+);
 app.use(express.json());
 
 // Initialize Middleware

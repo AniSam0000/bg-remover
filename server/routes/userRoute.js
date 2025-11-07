@@ -12,11 +12,11 @@ import authUser from "../middleware/auth.js";
 
 const userRouter = express.Router();
 
-userRouter.post(
-  "/webhooks",
-  express.raw({ type: "application/json" }),
-  clerkWebhooks
-);
+// userRouter.post(
+//   "/webhooks",
+//   express.raw({ type: "application/json" }),
+//   clerkWebhooks
+// );
 
 userRouter.get("/credits", authUser, userCredits);
 
